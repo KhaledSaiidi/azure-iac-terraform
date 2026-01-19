@@ -1,0 +1,45 @@
+# Terraform working directory
+.terraform/
+
+# State files
+*.tfstate
+*.tfstate.*
+
+# Plan files
+*.tfplan
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Provider/lock files (intentionally ignored per request)
+.terraform.lock.hcl
+
+# Sensitive variables
+*.tfvars
+*.tfvars.json
+terraform.tfvars
+terraform.tfvars.json
+
+# Common secret files
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.cer
+*.der
+*.jks
+*.env
+*.secrets
+*.secret
+
+# CLI config
+.terraformrc
+terraform.rc
