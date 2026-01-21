@@ -20,6 +20,11 @@ locals {
     priority    = 100 + i
     description = "Allow traffic on port ${port}"
   }]
+
+
+
+  # lookup for vm size based on environment
+  vm_size = lookup(var.vm_sizes, var.environment, "Standard_B2s")
 }
 resource "azurerm_resource_group" "rg" {
     name     = "${local.formatted_name}-rg"
@@ -60,5 +65,38 @@ resource "azurerm_network_security_group" "network_security_group" {
 
   tags = {
     environment = "Production"
+  }
+}
+
+
+resource "azurerm_virtual_machine" "main" {
+  name                  = "${var.environment}-vm"
+  location              = azurerm_resource_group.rg.location
+  resource_group_name   = azurerm_resource_group.rg.name
+  network_interface_ids = [azurerm_network_interface.main.id]
+  vm_size               = local.vm_size
+
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+  storage_os_disk {
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+  os_profile {
+    computer_name  = "hostname"
+    admin_username = "testadmin"
+    admin_password = "Password1234!"
+  }
+  os_profile_linux_config {
+    disable_password_authentication = false
+  }
+  tags = {
+    environment = "staging"
   }
 }
