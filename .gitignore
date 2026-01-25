@@ -20,6 +20,7 @@ override.tf.json
 
 # Provider/lock files (intentionally ignored per request)
 .terraform.lock.hcl
+*.terraform.lock.hcl
 
 # Sensitive variables
 *.tfvars
