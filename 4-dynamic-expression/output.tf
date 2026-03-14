@@ -7,7 +7,7 @@ output "env" {
 }
 
 output "demo" {
-  value = [ for count in local.nsg_rules : count.value.description ]
+  value = [for count in local.nsg_rules : count.value.description]
 }
 
 output "splat_nsg_rules" {

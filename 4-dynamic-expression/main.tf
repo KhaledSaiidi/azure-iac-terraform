@@ -9,7 +9,7 @@ resource "azurerm_network_security_group" "example" {
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 
-# Dynamically generates multiple `security_rule` blocks inside the parent resource
+  # Dynamically generates multiple `security_rule` blocks inside the parent resource
   dynamic "security_rule" {
     # Iterates over each rule definition in local.nsg_rules
     for_each = local.nsg_rules
@@ -25,7 +25,7 @@ resource "azurerm_network_security_group" "example" {
       destination_port_range     = security_rule.value.destination_port_range
       source_address_prefix      = "*"
       destination_address_prefix = "*"
-      description = security_rule.value.description
+      description                = security_rule.value.description
     }
   }
 

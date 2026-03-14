@@ -1,28 +1,28 @@
 variable "environment" {
-    type = string
-    description = "the env type"
-    default = "staging"
+  type        = string
+  description = "the env type"
+  default     = "staging"
 }
 
 variable "allowed_locations" {
-    type = list(string)
-    description = "List of allowed Azure locations"
-    default = ["East US", "West Europe", "Southeast Asia"]
+  type        = list(string)
+  description = "List of allowed Azure locations"
+  default     = ["East US", "West Europe", "Southeast Asia"]
 }
 
 variable "resource_tags" {
-    type = map(string)
-    description = "Tags to be applied to resources"
-    default = {
-        environment = "Development"
-        managed_by       = "DevOpsTeam"
-        departement     = "devops"
-    }
+  type        = map(string)
+  description = "Tags to be applied to resources"
+  default = {
+    environment = "Development"
+    managed_by  = "DevOpsTeam"
+    departement = "devops"
+  }
 }
 
 variable "storage_account_name" {
-    type = list(string)
-    default = ["mystorageaccount", "mystorageaccount2", "mystorageaccount3"]
+  type    = list(string)
+  default = ["mystorageaccount", "mystorageaccount2", "mystorageaccount3"]
 }
 
 variable "enable_storage_account" {
@@ -53,11 +53,11 @@ variable "storage_accounts" {
   default = {
     sa1 = {
       replication_type = "LRS"
-      tags = { environment = "dev", owner = "team-a" }
+      tags             = { environment = "dev", owner = "team-a" }
     }
     sa2 = {
       replication_type = "GRS"
-      tags = { environment = "staging", owner = "team-b" }
+      tags             = { environment = "staging", owner = "team-b" }
     }
   }
 }

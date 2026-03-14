@@ -61,7 +61,7 @@ locals {
   user_locations = [
     "East US",
     "West Europe",
-    "East US",  # Duplicate entry to demonstrate set conversion
+    "East US", # Duplicate entry to demonstrate set conversion
   ]
   default_locations = ["Central US"]
 

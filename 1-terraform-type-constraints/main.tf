@@ -5,9 +5,9 @@ resource "azurerm_resource_group" "example" {
 }
 
 resource "azurerm_virtual_network" "main" {
-  name                = "${var.environment}-network"
+  name          = "${var.environment}-network"
   address_space = [var.network_config[0]]
-  
+
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
 }
@@ -16,7 +16,7 @@ resource "azurerm_subnet" "internal" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.example.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes = ["${var.network_config[1]}/${var.network_config[2]}"]
+  address_prefixes     = ["${var.network_config[1]}/${var.network_config[2]}"]
 }
 
 resource "azurerm_network_interface" "main" {
@@ -50,7 +50,7 @@ resource "azurerm_virtual_machine" "main" {
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
-    disk_size_gb = var.storage_disk
+    disk_size_gb      = var.storage_disk
   }
   os_profile {
     computer_name  = "hostname"

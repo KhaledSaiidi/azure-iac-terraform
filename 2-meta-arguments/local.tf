@@ -1,7 +1,7 @@
 locals {
   common_tags = {
     environment = var.environment
-    lob = "banking"
-    stage = "alpha"
+    lob         = "banking"
+    stage       = "alpha"
   }
 }
