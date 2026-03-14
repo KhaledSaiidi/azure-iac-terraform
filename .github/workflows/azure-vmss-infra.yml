@@ -20,14 +20,14 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        id: checkout
+
       - name: "🚀 Starting VMSS infra workflow"
         run: |
           echo "🚀 Azure VMSS infra workflow started"
           echo "🧭 Runner: ${RUNNER_NAME} (${RUNNER_OS})"
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        id: checkout
 
       - name: "📦 Checkout result"
         if: ${{ always() }}
