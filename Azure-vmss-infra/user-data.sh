@@ -3,10 +3,10 @@ apt-get update -y
 apt-get install -y apache2 php php-curl libapache2-mod-php php-mysql jq
 ufw allow 'Apache Full'
 
-usermod -a -G azureuser azureuser
+usermod -a -G vmssinfraadmin vmssinfraadmin
 
 mkdir -p /var/www/html
-chown -R azureuser:azureuser /var/www
+chown -R vmssinfraadmin:vmssinfraadmin /var/www
 chmod 2775 /var/www
 find /var/www -type d -exec chmod 2775 {} \;
 find /var/www -type f -exec chmod 0664 {} \;

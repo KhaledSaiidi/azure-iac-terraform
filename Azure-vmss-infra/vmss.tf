@@ -18,9 +18,9 @@ resource "azurerm_orchestrated_virtual_machine_scale_set" "vmss_infra" {
   os_profile {
     linux_configuration {
       disable_password_authentication = true
-      admin_username                  = "azureuser"
+      admin_username                  = "vmssinfraadmin"
       admin_ssh_key {
-        username   = "azureuser"
+        username   = "vmssinfraadmin"
         public_key = file("~/.ssh/id_rsa.pub")
       }
     }
