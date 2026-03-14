@@ -119,8 +119,7 @@ variable "admin_username" {
   default     = "vmssinfraadmin"
 }
 
-variable "ssh_public_key_path" {
+variable "ssh_public_key" {
   type        = string
-  description = "Path to the SSH public key"
-  default     = "~/.ssh/id_rsa.pub"
+  description = "SSH public key content (e.g., ssh-ed25519 AAAA...)"
 }

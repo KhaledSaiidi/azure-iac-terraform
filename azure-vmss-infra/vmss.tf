@@ -20,7 +20,7 @@ resource "azurerm_orchestrated_virtual_machine_scale_set" "vmss_infra" {
       admin_username                  = var.admin_username
       admin_ssh_key {
         username   = var.admin_username
-        public_key = file(pathexpand(var.ssh_public_key_path))
+        public_key = var.ssh_public_key
       }
     }
   }
