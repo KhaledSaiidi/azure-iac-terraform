@@ -18,16 +18,45 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
+      - name: "🚀 Starting VMSS infra workflow"
+        run: |
+          echo "🚀 Azure VMSS infra workflow started"
+          echo "🧭 Runner: ${RUNNER_NAME} (${RUNNER_OS})"
+
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        id: checkout
+
+      - name: "📦 Checkout result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.checkout.outcome }}" = "success" ]; then
+            echo "✅ Checkout completed"
+          else
+            echo "❌ Checkout failed (outcome: ${{ steps.checkout.outcome }})"
+            exit 1
+          fi
 
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v3
+        id: setup_terraform
         with:
           terraform_version: '1.14.7'
 
+      - name: "🧰 Terraform setup result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.setup_terraform.outcome }}" = "success" ]; then
+            echo "✅ Terraform setup completed"
+          else
+            echo "❌ Terraform setup failed (outcome: ${{ steps.setup_terraform.outcome }})"
+            exit 1
+          fi
+
       - name: Validate Azure Credentials
+        id: validate_creds
         run: |
           missing=()
           for v in ARM_CLIENT_ID ARM_CLIENT_SECRET ARM_SUBSCRIPTION_ID ARM_TENANT_ID GH_TOKEN; do
@@ -40,3 +69,13 @@ jobs:
             exit 1
           fi
           echo "All required secrets are present."
+
+      - name: "🔐 Credentials validation result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.validate_creds.outcome }}" = "success" ]; then
+            echo "✅ Credentials validation completed"
+          else
+            echo "❌ Credentials validation failed (outcome: ${{ steps.validate_creds.outcome }})"
+            exit 1
+          fi
