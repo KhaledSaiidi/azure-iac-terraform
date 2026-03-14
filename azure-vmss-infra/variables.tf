@@ -50,19 +50,19 @@ variable "max_capacity" {
   default     = 5
 }
 
-variable cpu_threshold {
+variable "cpu_threshold" {
   type        = number
   description = "CPU threshold for autoscaling"
   default     = 75
 }
 
-variable scale_out_value {
+variable "scale_out_value" {
   type        = number
   description = "Number of instances to add when scaling out"
   default     = 1
 }
 
-variable scale_in_value {
+variable "scale_in_value" {
   type        = number
   description = "Number of instances to remove when scaling in"
   default     = 1
