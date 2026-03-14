@@ -24,7 +24,7 @@ resource "azurerm_subnet" "subnet" {
   address_prefixes     = var.address_prefixes
 }
 
-resource "azurem_network_security_group" "nsg" {
+resource "azurerm_network_security_group" "nsg" {
   name                = "${var.environment}-nsg"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
@@ -66,7 +66,7 @@ resource "azurem_network_security_group" "nsg" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
-  subnet_id                 = azurerm_virtual_network.vnet.subnet[0].id
+  subnet_id                 = azurerm_subnet.subnet.id
   network_security_group_id = azurem_network_security_group.nsg.id
 }
 
@@ -158,7 +158,7 @@ resource "azurerm_nat_gateway" "nat_gateway" {
 
 
 resource "azurerm_subnet_nat_gateway_association" "nat_gateway_assoc" {
-  subnet_id      = azurerm_virtual_network.vnet.subnet[0].id
+  subnet_id      = azurerm_subnet.subnet.id
   nat_gateway_id = azurerm_nat_gateway.nat_gateway.id
 }
 
