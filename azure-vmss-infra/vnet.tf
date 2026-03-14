@@ -92,15 +92,17 @@ resource "azurerm_lb_backend_address_pool" "backend_pool" {
 }
 
 resource "azurerm_lb_rule" "lb_rule" {
-  name                           = "${local.name_prefix}-lb-http-rule"
+  for_each = { for rule in local.lb_rules : rule.name => rule }
+
+  name                           = each.value.name
   loadbalancer_id                = azurerm_lb.lb.id
-  protocol                       = "Tcp"
-  frontend_port                  = 80
-  backend_port                   = 80
+  protocol                       = each.value.protocol
+  frontend_port                  = each.value.frontend_port
+  backend_port                   = each.value.backend_port
   frontend_ip_configuration_name = "LoadBalancerFrontEnd"
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.backend_pool.id]
   probe_id                       = azurerm_lb_probe.lb_probe.id
-  idle_timeout_in_minutes        = 4
+  idle_timeout_in_minutes        = each.value.idle_timeout_in_minutes
 }
 
 resource "azurerm_lb_probe" "lb_probe" {

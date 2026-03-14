@@ -31,7 +31,7 @@ You will create infrastructure that includes:
 
 ### Compute
 - Set up a VMSS with:
-  - Ubuntu 20.04 LTS
+  - Ubuntu 202.04 Jammy
   - VM sizes based on environment (use `lookup`):
     - Dev: `Standard_B1s`
     - Stage: `Standard_B2s`

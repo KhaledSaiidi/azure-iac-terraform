@@ -33,17 +33,6 @@ locals {
       destination_address_prefix = "*"
     },
     {
-      name                       = "allow-ssh-from-internet"
-      priority                   = 110
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "22"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-    },
-    {
       name                       = "deny-all-inbound"
       priority                   = 4096
       direction                  = "Inbound"
@@ -53,6 +42,16 @@ locals {
       destination_port_range     = "*"
       source_address_prefix      = "*"
       destination_address_prefix = "*"
+    }
+  ]
+
+  lb_rules = [
+    {
+      name                    = "${local.name_prefix}-lb-http-rule"
+      protocol                = "Tcp"
+      frontend_port           = 80
+      backend_port            = 80
+      idle_timeout_in_minutes = 4
     }
   ]
 }
