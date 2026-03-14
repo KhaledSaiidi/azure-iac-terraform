@@ -58,6 +58,11 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
+resource "azurerm_subnet_network_security_group_association" "nsg_assoc_mgmt" {
+  subnet_id                 = azurerm_subnet.mgmt.id
+  network_security_group_id = azurerm_network_security_group.nsg.id
+}
+
 resource "azurerm_public_ip" "lb_ip" {
   name                = "${local.name_prefix}-lb-ip"
   location            = var.location
