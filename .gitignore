@@ -1,9 +1,11 @@
 # Terraform working directory
 .terraform/
+**/.terraform/
 
 # State files
 *.tfstate
 *.tfstate.*
+*.tfstate.backup
 
 # Plan files
 *.tfplan
@@ -25,6 +27,8 @@ override.tf.json
 # Sensitive variables
 *.tfvars
 *.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
 terraform.tfvars
 terraform.tfvars.json
 
@@ -44,3 +48,9 @@ terraform.tfvars.json
 # CLI config
 .terraformrc
 terraform.rc
+**/.terraformrc
+**/terraform.rc
+
+# Terraform CLI credentials
+.terraform.d/credentials.tfrc.json
+**/.terraform.d/credentials.tfrc.json
