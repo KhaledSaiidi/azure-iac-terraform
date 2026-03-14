@@ -23,5 +23,11 @@ variable "resource_tags" {
 variable "network_config" {
   type        = list(string)
   description = "List of address spaces for the virtual network"
+  default     = ["10.0.0.0/16"]
+}
+
+variable "address_prefixes" {
+  type        = list(string)
+  description = "List of address spaces for the virtual network"
   default     = ["10.0.0.0/20"]
 }
