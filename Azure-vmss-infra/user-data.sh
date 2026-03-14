@@ -14,4 +14,5 @@ cd /var/www/html
 curl -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01" | jq > index.html
 sed -i '1i<pre>' index.html
 sed -i '$a</pre>' index.html
-curl https://raw.githubusercontent.com/Azure/vm-scale-sets/master/terraform/terraform-tutorial/app/index.php -O
+
+curl https://raw.githubusercontent.com/KhaledSaiidi/azure-iac-terraform/refs/heads/main/Azure-vmss-infra/assets/index.php -O
