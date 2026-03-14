@@ -1,8 +1,8 @@
 terraform {
   backend "azurerm" {
-    resource_group_name  = "tfstate-azure-lab"
-    storage_account_name = "ks072"
-    container_name       = "tfstate"
+    resource_group_name  = "rg-platform-tfstate"
+    storage_account_name = "platengtfstate"
+    container_name       = "tfstate001"
     key                  = "ks.terraform.tfstate"
   }
 }
