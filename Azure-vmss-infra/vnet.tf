@@ -1,5 +1,6 @@
 resource "random_pet" "lb_hostname" {
-
+  length    = 4
+  separator = "-"
 }
 
 resource "azurerm_resource_group" "rg" {

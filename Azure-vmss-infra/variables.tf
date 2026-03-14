@@ -31,3 +31,39 @@ variable "address_prefixes" {
   description = "List of address spaces for the virtual network"
   default     = ["10.0.0.0/20"]
 }
+
+variable "default_capacity" {
+  type        = number
+  description = "Default capacity for the virtual machine scale set"
+  default     = 2
+}
+
+variable "min_capacity" {
+  type        = number
+  description = "Minimum capacity for the virtual machine scale set"
+  default     = 1
+}
+
+variable "max_capacity" {
+  type        = number
+  description = "Maximum capacity for the virtual machine scale set"
+  default     = 5
+}
+
+variable cpu_threshold {
+  type        = number
+  description = "CPU threshold for autoscaling"
+  default     = 75
+}
+
+variable scale_out_value {
+  type        = number
+  description = "Number of instances to add when scaling out"
+  default     = 1
+}
+
+variable scale_in_value {
+  type        = number
+  description = "Number of instances to remove when scaling in"
+  default     = 1
+}
