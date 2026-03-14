@@ -1,7 +1,7 @@
 variable "environment" {
   type        = string
-  description = "the env type"
-  default     = "staging"
+  description = "Environment name (dev, stage, prod)"
+  default     = "stage"
 }
 
 variable "allowed_locations" {
@@ -10,26 +10,49 @@ variable "allowed_locations" {
   default     = ["East US", "West Europe", "Southeast Asia"]
 }
 
+variable "location" {
+  type        = string
+  description = "Azure region for all resources"
+  default     = "East US"
+
+  validation {
+    condition     = contains(var.allowed_locations, var.location)
+    error_message = "Location must be one of the allowed locations."
+  }
+}
+
+variable "resource_prefix" {
+  type        = string
+  description = "Prefix for resource naming"
+  default     = "vmss-lab"
+}
+
 variable "resource_tags" {
   type        = map(string)
   description = "Tags to be applied to resources"
   default = {
     environment = "Development"
     managed_by  = "DevOpsTeam"
-    departement = "devops"
+    department  = "devops"
   }
 }
 
-variable "network_config" {
+variable "vnet_address_space" {
   type        = list(string)
-  description = "List of address spaces for the virtual network"
+  description = "Address space for the virtual network"
   default     = ["10.0.0.0/16"]
 }
 
-variable "address_prefixes" {
+variable "subnet_app_prefixes" {
   type        = list(string)
-  description = "List of address spaces for the virtual network"
-  default     = ["10.0.0.0/20"]
+  description = "Address prefixes for the application subnet"
+  default     = ["10.0.1.0/24"]
+}
+
+variable "subnet_mgmt_prefixes" {
+  type        = list(string)
+  description = "Address prefixes for the management subnet"
+  default     = ["10.0.2.0/24"]
 }
 
 variable "default_capacity" {
@@ -41,7 +64,7 @@ variable "default_capacity" {
 variable "min_capacity" {
   type        = number
   description = "Minimum capacity for the virtual machine scale set"
-  default     = 1
+  default     = 2
 }
 
 variable "max_capacity" {
@@ -50,10 +73,16 @@ variable "max_capacity" {
   default     = 5
 }
 
-variable "cpu_threshold" {
+variable "cpu_scale_out_threshold" {
   type        = number
-  description = "CPU threshold for autoscaling"
-  default     = 75
+  description = "CPU threshold for scaling out"
+  default     = 80
+}
+
+variable "cpu_scale_in_threshold" {
+  type        = number
+  description = "CPU threshold for scaling in"
+  default     = 10
 }
 
 variable "scale_out_value" {
@@ -66,4 +95,38 @@ variable "scale_in_value" {
   type        = number
   description = "Number of instances to remove when scaling in"
   default     = 1
+}
+
+variable "vmss_sku_by_env" {
+  type        = map(string)
+  description = "VMSS SKU per environment"
+  default = {
+    dev   = "Standard_B1s"
+    stage = "Standard_B2s"
+    prod  = "Standard_B2ms"
+  }
+}
+
+variable "vmss_sku_default" {
+  type        = string
+  description = "Default VMSS SKU if environment is not in the map"
+  default     = "Standard_B2s"
+}
+
+variable "zones" {
+  type        = list(string)
+  description = "Availability zones to use when supported"
+  default     = ["1"]
+}
+
+variable "admin_username" {
+  type        = string
+  description = "Admin username for VMSS instances"
+  default     = "vmssinfraadmin"
+}
+
+variable "ssh_public_key_path" {
+  type        = string
+  description = "Path to the SSH public key"
+  default     = "~/.ssh/id_rsa.pub"
 }
