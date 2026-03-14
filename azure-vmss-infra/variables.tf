@@ -113,12 +113,6 @@ variable "vmss_sku_default" {
   default     = "Standard_B2s"
 }
 
-variable "zones" {
-  type        = list(string)
-  description = "Availability zones to use when supported"
-  default     = ["1"]
-}
-
 variable "admin_username" {
   type        = string
   description = "Admin username for VMSS instances"

@@ -12,7 +12,6 @@ resource "azurerm_orchestrated_virtual_machine_scale_set" "vmss_infra" {
   sku_name                    = lookup(var.vmss_sku_by_env, var.environment, var.vmss_sku_default)
   instances                   = var.default_capacity
   platform_fault_domain_count = 1
-  zones                       = var.zones
   user_data_base64            = base64encode(file("${path.module}/user-data.sh"))
 
   os_profile {

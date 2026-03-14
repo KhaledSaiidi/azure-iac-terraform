@@ -58,18 +58,12 @@ resource "azurerm_subnet_network_security_group_association" "nsg_assoc" {
   network_security_group_id = azurerm_network_security_group.nsg.id
 }
 
-resource "azurerm_subnet_network_security_group_association" "nsg_assoc_mgmt" {
-  subnet_id                 = azurerm_subnet.mgmt.id
-  network_security_group_id = azurerm_network_security_group.nsg.id
-}
-
 resource "azurerm_public_ip" "lb_ip" {
   name                = "${local.name_prefix}-lb-ip"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
-  zones               = var.zones
   domain_name_label   = "${local.name_prefix}-lb-${random_pet.lb_hostname.id}"
   tags                = local.common_tags
 }
@@ -121,7 +115,6 @@ resource "azurerm_public_ip" "vm_public_ip" {
   resource_group_name = azurerm_resource_group.rg.name
   allocation_method   = "Static"
   sku                 = "Standard"
-  zones               = var.zones
   tags                = local.common_tags
 }
 
@@ -131,7 +124,6 @@ resource "azurerm_nat_gateway" "nat_gateway" {
   resource_group_name     = azurerm_resource_group.rg.name
   sku_name                = "Standard"
   idle_timeout_in_minutes = 10
-  zones                   = var.zones
   tags                    = local.common_tags
 }
 
