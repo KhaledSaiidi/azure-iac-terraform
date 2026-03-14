@@ -1,70 +1,114 @@
-# Advanced Azure Infrastructure with Terraform
+# Azure VMSS Infrastructure (Terraform)
 
-Build a scalable Azure web application stack using Terraform: a VM Scale Set behind a Load Balancer, with secure networking and autoscaling.
+Build a scalable web tier on Azure with a load‑balanced VM Scale Set, autoscaling, and a dedicated jump host in a management subnet. The stack is designed to be environment‑aware and safe by default for production‑like deployments.
 
 ![Architecture diagram](assets/diagram.png)
 
-## Assignment Overview
-You will create infrastructure that includes:
-- A resource group in an approved region with a validation rule.
-- A VNet with two subnets and a locked-down NSG.
-- A VM Scale Set with environment-based sizing and autoscaling.
-- A public Azure Load Balancer with health probes.
+## Architecture Overview
 
-## Requirements
+**Resource group**
+- Single resource group per environment with enforced location validation.
 
-### Base Infrastructure
-- Create a resource group in **one** of these regions:
-  - East US
-  - West Europe
-  - Southeast Asia
-- Add a validation rule that restricts other regions.
+**Networking**
+- VNet with two subnets:
+  - `app` subnet: hosts the VMSS.
+  - `mgmt` subnet: hosts the bastion jump host.
+- NSG on the `app` subnet only:
+  - Allows inbound HTTP/HTTPS **from Azure Load Balancer**.
+  - Denies all other inbound traffic.
+- NAT gateway on the `app` subnet for outbound internet access.
+- Management subnet is intentionally **not** bound to the app NSG.
 
-### Networking
-- Create a VNet with two subnets:
-  - Application subnet (for VMSS)
-  - Management subnet (for future use)
-- Configure an NSG that:
-  - Only allows traffic from the load balancer to the VMSS
-  - Uses **dynamic blocks** for rule configuration
-  - Denies all other inbound traffic
+**Load Balancer**
+- Standard public Load Balancer with:
+  - Public IP.
+  - Backend pool attached to the VMSS.
+  - HTTP health probe on port 80.
+  - LB rules generated from locals (data‑driven).
 
-### Compute
-- Set up a VMSS with:
-  - Ubuntu 202.04 Jammy
-  - VM sizes based on environment (use `lookup`):
-    - Dev: `Standard_B1s`
-    - Stage: `Standard_B2s`
-    - Prod: `Standard_B2ms`
-- Configure autoscaling:
-  - Scale in when CPU < 10%
-  - Scale out when CPU > 80%
-  - Min instances: 2
-  - Max instances: 5
+**Compute**
+- **VMSS (app tier)**:
+  - Ubuntu 22.04 LTS (Jammy).
+  - SKU based on environment (`dev`, `stage`, `prod`).
+  - Autoscaling based on CPU thresholds.
+  - Cloud‑init user data installs Apache/PHP and renders instance metadata.
+- **Bastion (jump host)**:
+  - Ubuntu 20.04 LTS (Focal).
+  - Small VM size (`Standard_B1s`).
+  - Public IP and SSH‑only access.
+  - Placed in the `mgmt` subnet.
 
-### Load Balancer
-- Create an Azure Load Balancer with:
-  - Public IP
-  - Backend pool connected to the VMSS
-  - Health probe on port 80
+## Repository Layout
 
-## Technical Requirements
+- `provider.tf`: Terraform and provider versions.
+- `variables.tf`: Inputs and validation.
+- `locals.tf`: Naming, tags, and data‑driven rules.
+- `vnet.tf`: Resource group, VNet, subnets, NSG, LB, NAT gateway.
+- `vmss.tf`: VM Scale Set configuration.
+- `autoscale.tf`: Autoscale settings for VMSS.
+- `bastion.tf`: Jump host VM, NIC, NSG, and public IP.
+- `backend.tf`: Remote state backend configuration.
+- `backend.sh`: Script to bootstrap the state backend.
+- `user-data.sh`: App tier cloud‑init content.
 
-### Variables
-Create a `terraform.tfvars` file with:
-- Environment name
-- Region
-- Resource name prefix
-- Instance counts
-- Network address spaces
+## Inputs
 
-### Locals
-Implement locals for:
-- Common tags
-- Resource naming convention
-- Network configuration
+Core variables (see `variables.tf`):
+- `environment`: `dev` | `stage` | `prod`
+- `location`: `East US` | `West Europe` | `Southeast Asia` (validated)
+- `resource_prefix`: base name for resources
+- `ssh_public_key`: SSH public key **content** (e.g., `ssh-ed25519 AAAA...`)
+- `default_capacity`, `min_capacity`, `max_capacity`: VMSS sizing
+- `cpu_scale_in_threshold`, `cpu_scale_out_threshold`: autoscale thresholds
+- `vnet_address_space`, `subnet_app_prefixes`, `subnet_mgmt_prefixes`
 
-### Dynamic Blocks
-Use dynamic blocks for:
-- NSG rules
-- Load balancer rules
+### Example `terraform.tfvars`
+
+```hcl
+environment        = "stage"
+location           = "East US"
+resource_prefix    = "vmss-lab"
+ssh_public_key     = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF..."
+default_capacity   = 2
+min_capacity       = 2
+max_capacity       = 5
+vnet_address_space = ["10.0.0.0/16"]
+subnet_app_prefixes  = ["10.0.1.0/24"]
+subnet_mgmt_prefixes = ["10.0.2.0/24"]
+```
+
+## How It Works
+
+- **Inbound web traffic** hits the public Load Balancer.
+- **LB health probe** checks `/` on port `80`.
+- **NSG** allows only LB‑originated HTTP/HTTPS to the app subnet.
+- **VMSS** instances serve a basic web page (metadata dumped to `index.html`).
+- **Autoscale** adds/removes instances based on CPU.
+- **Bastion** provides SSH access for management via its public IP.
+
+## Notes
+
+- **No availability zones are pinned** to avoid region‑specific failures. Add zones only when targeting regions with verified support.
+- **Bastion SSH is open to the internet** by default. For production use, restrict the source CIDR.
+- **User data fetches an external file** from GitHub. For fully deterministic builds, inline the file or host it in trusted storage.
+
+## Quick Start
+
+1. Initialize and validate:
+```bash
+terraform init
+terraform validate
+```
+
+2. Plan and apply:
+```bash
+terraform plan
+terraform apply
+```
+
+3. Bastion access:
+```bash
+ssh -i /path/to/private_key ${ADMIN_USERNAME}@<bastion_public_ip>
+```
+
+Replace `${ADMIN_USERNAME}` with `admin_username` and `<bastion_public_ip>` with the created IP.
