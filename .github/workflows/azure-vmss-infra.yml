@@ -1,0 +1,42 @@
+name: Azure VMSS Infrastructure Deployment
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - azure-vmss-infra/assets/index.php
+defaults:
+  run:
+    working-directory: azure-vmss-infra
+
+jobs:
+  manage-infrastructure:
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: '1.14.7'
+
+      - name: Validate Azure Credentials
+        run: |
+          missing=()
+          for v in ARM_CLIENT_ID ARM_CLIENT_SECRET ARM_SUBSCRIPTION_ID ARM_TENANT_ID GH_TOKEN; do
+            if [ -z "${!v:-}" ]; then
+              missing+=("$v")
+            fi
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+          echo "All required secrets are present."
