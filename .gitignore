@@ -9,6 +9,7 @@
 
 # Plan files
 *.tfplan
+*.out
 
 # Crash logs
 crash.log

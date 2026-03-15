@@ -89,8 +89,16 @@ jobs:
           terraform init -input=false
           echo "🧮 Running terraform plan"
           terraform plan -input=false -out=plan.out
-          echo "🧾 Plan summary (create/update/destroy):"
-          terraform show -no-color plan.out | grep -E "will be created|will be updated|will be destroyed" || true
+          echo "🧾 Plan summary"
+          terraform show -no-color plan.out | grep -E "^Plan: " || true
+          echo ""
+          echo "📋 Planned resource changes"
+          terraform show -no-color plan.out | \
+            awk '
+              /^  # / && /will be created/ {print "  ➕ " $0; next}
+              /^  # / && /will be updated/ {print "  🔧 " $0; next}
+              /^  # / && /will be destroyed/ {print "  🗑️  " $0; next}
+            ' | sed -E "s/^  (➕|🔧|🗑️  )  # /  \\1 /" || true
 
       - name: "📊 Plan result"
         if: ${{ always() }}
