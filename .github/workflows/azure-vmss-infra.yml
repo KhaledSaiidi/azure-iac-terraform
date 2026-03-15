@@ -93,7 +93,7 @@ jobs:
             exit 1
           fi
 
-      - name: "🧭📐 Plan Infrastructure Changes"
+      - name: "📐 Plan Infrastructure Changes"
         if: ${{ steps.validate_creds.outcome == 'success' }}
         id: plan
         run: |
