@@ -18,6 +18,7 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout repository
@@ -59,7 +60,7 @@ jobs:
         id: validate_creds
         run: |
           missing=()
-          for v in ARM_CLIENT_ID ARM_CLIENT_SECRET ARM_SUBSCRIPTION_ID ARM_TENANT_ID GH_TOKEN; do
+          for v in ARM_CLIENT_ID ARM_CLIENT_SECRET ARM_SUBSCRIPTION_ID ARM_TENANT_ID GH_TOKEN TF_VAR_ssh_public_key; do
             if [ -z "${!v:-}" ]; then
               missing+=("$v")
             fi
@@ -77,5 +78,28 @@ jobs:
             echo "✅ Credentials validation completed"
           else
             echo "❌ Credentials validation failed (outcome: ${{ steps.validate_creds.outcome }})"
+            exit 1
+          fi
+
+      - name: "🧭📐 Plan Terraform Changes"
+        if: ${{ steps.validate_creds.outcome == 'success' }}
+        id: plan
+        run: |
+          echo "🧰 Running terraform init"
+          terraform init -input=false
+          echo "🧮 Running terraform plan"
+          terraform plan -input=false -out=plan.out
+          echo "🧾 Plan summary (create/update/destroy):"
+          terraform show -no-color plan.out | grep -E "will be created|will be updated|will be destroyed" || true
+
+      - name: "📊 Plan result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.plan.outcome }}" = "success" ]; then
+            echo "✅ Terraform plan completed"
+          elif [ "${{ steps.plan.outcome }}" = "skipped" ]; then
+            echo "⚠️ Terraform plan skipped"
+          else
+            echo "❌ Terraform plan failed (outcome: ${{ steps.plan.outcome }})"
             exit 1
           fi
