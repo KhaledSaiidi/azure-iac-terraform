@@ -5,6 +5,17 @@ on:
       - main
     paths:
       - azure-vmss-infra/assets/index.php
+  workflow_dispatch:
+    inputs:
+      tf_action:
+        description: "Terraform action to perform"
+        required: false
+        type: choice
+        default: none
+        options:
+          - none
+          - deploy
+          - destroy
 defaults:
   run:
     working-directory: azure-vmss-infra
@@ -19,6 +30,7 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+      TF_ACTION: ${{ inputs.tf_action || 'none' }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - name: Checkout repository
@@ -81,7 +93,7 @@ jobs:
             exit 1
           fi
 
-      - name: "🧭📐 Plan Terraform Changes"
+      - name: "🧭📐 Plan Infrastructure Changes"
         if: ${{ steps.validate_creds.outcome == 'success' }}
         id: plan
         run: |
@@ -110,7 +122,7 @@ jobs:
             echo "🟢 No resource changes to display."
           fi
 
-      - name: "📊 Plan result"
+      - name: "📊 Infrastructure Plan result"
         if: ${{ always() }}
         run: |
           if [ "${{ steps.plan.outcome }}" = "success" ]; then
@@ -119,5 +131,54 @@ jobs:
             echo "⚠️ Terraform plan skipped"
           else
             echo "❌ Terraform plan failed (outcome: ${{ steps.plan.outcome }})"
+            exit 1
+          fi
+
+      - name: "🧭 TF_ACTION Selector"
+        if: ${{ always() }}
+        run: |
+          if [ -z "${TF_ACTION:-}" ]; then
+            echo "⚠️ TF_ACTION is not set (expected: deploy|destroy)."
+          else
+            echo "🧭 TF_ACTION=${TF_ACTION}"
+          fi
+
+      - name: "🚀📦 Deploy Infrastructure"
+        if: ${{ steps.plan.outcome == 'success' && env.TF_ACTION == 'deploy' }}
+        id: deploy
+        run: |
+          echo "🚀 Applying Terraform plan"
+          terraform apply -input=false -auto-approve plan.out
+          echo "✅ Terraform apply completed"
+
+      - name: "📊 Infrastructure Deploy result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.deploy.outcome }}" = "success" ]; then
+            echo "✅ Terraform deploy completed"
+          elif [ "${{ steps.deploy.outcome }}" = "skipped" ]; then
+            echo "⚠️ Terraform deploy skipped"
+          else
+            echo "❌ Terraform deploy failed (outcome: ${{ steps.deploy.outcome }})"
+            exit 1
+          fi
+
+      - name: "🧨🗑️ Destroy Infrastructure"
+        if: ${{ env.TF_ACTION == 'destroy' }}
+        id: destroy
+        run: |
+          echo "🧨 Destroying Terraform-managed resources"
+          terraform destroy -input=false -auto-approve
+          echo "✅ Terraform destroy completed"
+
+      - name: "📊 Infrastructure Destroy result"
+        if: ${{ always() }}
+        run: |
+          if [ "${{ steps.destroy.outcome }}" = "success" ]; then
+            echo "✅ Terraform destroy completed"
+          elif [ "${{ steps.destroy.outcome }}" = "skipped" ]; then
+            echo "⚠️ Terraform destroy skipped"
+          else
+            echo "❌ Terraform destroy failed (outcome: ${{ steps.destroy.outcome }})"
             exit 1
           fi
