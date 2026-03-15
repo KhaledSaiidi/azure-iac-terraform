@@ -35,6 +35,7 @@ resource "azurerm_orchestrated_virtual_machine_scale_set" "vmss_infra" {
   os_disk {
     storage_account_type = "Premium_LRS"
     caching              = "ReadWrite"
+    disk_size_gb         = var.os_disk_size_gb
   }
 
   network_interface {

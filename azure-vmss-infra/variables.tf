@@ -123,3 +123,9 @@ variable "ssh_public_key" {
   type        = string
   description = "SSH public key content (e.g., ssh-ed25519 AAAA...)"
 }
+
+variable "os_disk_size_gb" {
+  type        = number
+  description = "OS disk size in GB for VMSS instances and bastion VM"
+  default     = 32
+}
