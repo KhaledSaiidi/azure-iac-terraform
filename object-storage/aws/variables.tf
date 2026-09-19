@@ -81,9 +81,9 @@ variable "enforce_tls" {
   type    = bool
   default = true
 }
-variable "key_admin_principal_arns" {
+variable "key_admin_principal" {
   type    = string
-  default = "arn:aws:iam::456441406929:user/khaleds"
+  default = "456441406929:user/khaleds"
 }
 
 variable "versioning_configuration_status" {

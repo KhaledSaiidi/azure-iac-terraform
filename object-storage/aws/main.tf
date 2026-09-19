@@ -71,7 +71,7 @@ resource "aws_kms_key" "bucket_kms_key" {
         Sid    = "Allow administration of the key"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${var.key_admin_principal_arns}"
+          AWS = "arn:aws:iam::${var.key_admin_principal}"
         },
         Action = [
           "kms:ReplicateKey",
@@ -101,18 +101,16 @@ resource "aws_s3_account_public_access_block" "account" {
   restrict_public_buckets = var.restrict_public_buckets_account
 }
 
-
-
 resource "aws_s3_bucket" "stamp_bucket" {
   bucket              = var.bucket_name
   object_lock_enabled = var.object_lock_enabled
   tags                = var.tags
 }
 
-resource "aws_s3_bucket_versioning" "versioning_example" {
+resource "aws_s3_bucket_versioning" "versioning_enabled" {
   bucket = aws_s3_bucket.stamp_bucket.id
   versioning_configuration {
-    status = "Enabled"
+    status = var.versioning_configuration_status
   }
 }
 
@@ -127,7 +125,7 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "stamp_bucket_locking" {
-  count  = var.var.object_lock_enabled ? 1 : 0
+  count  = var.object_lock_enabled ? 1 : 0
   bucket = aws_s3_bucket.stamp_bucket.id
 
   rule {
@@ -136,6 +134,7 @@ resource "aws_s3_bucket_object_lock_configuration" "stamp_bucket_locking" {
       days = var.stamp_bucket_locking_default_retention_days
     }
   }
+  depends_on = [aws_s3_bucket_versioning.versioning_enabled]
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "stamp_bucket_encryption" {
