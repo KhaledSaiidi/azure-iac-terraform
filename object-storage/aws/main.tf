@@ -13,8 +13,8 @@ data "aws_iam_policy_document" "enforce_tls" {
     actions = ["s3:*"]
 
     resources = [
-      aws_s3_bucket.secure_bucket.arn,
-      "${aws_s3_bucket.secure_bucket.arn}/*",
+      aws_s3_bucket.stamp_bucket.arn,
+      "${aws_s3_bucket.stamp_bucket.arn}/*",
     ]
 
     # Condition 1: Deny any non-HTTPS traffic
@@ -37,8 +37,8 @@ data "aws_iam_policy_document" "enforce_tls" {
     actions = ["s3:*"]
 
     resources = [
-      aws_s3_bucket.secure_bucket.arn,
-      "${aws_s3_bucket.secure_bucket.arn}/*",
+      aws_s3_bucket.stamp_bucket.arn,
+      "${aws_s3_bucket.stamp_bucket.arn}/*",
     ]
 
     # Condition 2: Deny protocols older than TLS 1.2
@@ -71,7 +71,7 @@ resource "aws_kms_key" "bucket_kms_key" {
         Sid    = "Allow administration of the key"
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Alice"
+          AWS = "arn:aws:iam::${var.key_admin_principal_arns}"
         },
         Action = [
           "kms:ReplicateKey",
@@ -87,22 +87,6 @@ resource "aws_kms_key" "bucket_kms_key" {
           "kms:Delete*",
           "kms:ScheduleKeyDeletion",
           "kms:CancelKeyDeletion"
-        ],
-        Resource = "*"
-      },
-      {
-        Sid    = "Allow use of the key"
-        Effect = "Allow"
-        Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Bob"
-        },
-        Action = [
-          "kms:DescribeKey",
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey",
-          "kms:GenerateDataKeyWithoutPlaintext"
         ],
         Resource = "*"
       }
@@ -121,8 +105,15 @@ resource "aws_s3_account_public_access_block" "account" {
 
 resource "aws_s3_bucket" "stamp_bucket" {
   bucket              = var.bucket_name
-  object_lock_enabled = true
+  object_lock_enabled = var.object_lock_enabled
   tags                = var.tags
+}
+
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = aws_s3_bucket.stamp_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "bucket" {
@@ -136,12 +127,13 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "stamp_bucket_locking" {
+  count  = var.var.object_lock_enabled ? 1 : 0
   bucket = aws_s3_bucket.stamp_bucket.id
 
   rule {
     default_retention {
-      mode = "COMPLIANCE"
-      days = 7
+      mode = var.stamp_bucket_locking_default_retention_mode
+      days = var.stamp_bucket_locking_default_retention_days
     }
   }
 }
@@ -152,7 +144,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "stamp_bucket_encr
   rule {
     apply_server_side_encryption_by_default {
       kms_master_key_id = aws_kms_key.bucket_kms_key.arn
-      sse_algorithm     = var.sse_algorithm
+      sse_algorithm     = "aws:kms"
     }
   }
 }

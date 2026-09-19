@@ -27,10 +27,6 @@ variable "tags" {
   }
 }
 
-variable "sse_algorithm" {
-  type    = string
-  default = "aws:kms"
-}
 
 variable "object_lock_enabled" {
   type    = bool
@@ -84,4 +80,13 @@ variable "restrict_public_buckets_bucket" {
 variable "enforce_tls" {
   type    = bool
   default = true
+}
+variable "key_admin_principal_arns" {
+  type    = string
+  default = "arn:aws:iam::456441406929:user/khaleds"
+}
+
+variable "versioning_configuration_status" {
+  type    = string
+  default = "Enabled"
 }
