@@ -94,15 +94,8 @@ resource "aws_kms_key" "bucket_kms_key" {
   })
 }
 
-resource "aws_s3_account_public_access_block" "account" {
-  block_public_acls       = var.block_public_acls_account
-  block_public_policy     = var.block_public_policy_account
-  ignore_public_acls      = var.ignore_public_acls_account
-  restrict_public_buckets = var.restrict_public_buckets_account
-}
-
 resource "aws_s3_bucket" "stamp_bucket" {
-  bucket              = var.bucket_name
+  bucket_prefix              = var.bucket_name
   object_lock_enabled = var.object_lock_enabled
   tags                = var.tags
 }

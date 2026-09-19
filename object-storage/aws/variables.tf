@@ -15,7 +15,7 @@ variable "deletion_window_in_days" {
 
 variable "bucket_name" {
   type    = string
-  default = "my-stamp-bucket"
+  default = "my-stamp-bucket-"
 }
 
 
@@ -41,23 +41,6 @@ variable "stamp_bucket_locking_default_retention_mode" {
 variable "stamp_bucket_locking_default_retention_days" {
   type    = number
   default = 7
-}
-
-variable "block_public_acls_account" {
-  type    = bool
-  default = true
-}
-variable "block_public_policy_account" {
-  type    = bool
-  default = true
-}
-variable "ignore_public_acls_account" {
-  type    = bool
-  default = true
-}
-variable "restrict_public_buckets_account" {
-  type    = bool
-  default = true
 }
 
 variable "block_public_acls_bucket" {
