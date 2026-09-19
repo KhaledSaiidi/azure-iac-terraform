@@ -1,22 +1,22 @@
 resource "azuread_group" "administrators" {
-  display_name = "Administrators Department"
+  display_name     = "Administrators Department"
   security_enabled = true
 }
 
 resource "azuread_group_member" "administrators" {
-  for_each = { for u in azuread_user.users: u.mail_nickname => u if u.department == "Administrators" }
+  for_each = { for u in azuread_user.users : u.mail_nickname => u if u.department == "Administrators" }
 
   group_object_id  = azuread_group.administrators.id
   member_object_id = each.value.id
 }
 
 resource "azuread_group" "engineers" {
-  display_name = "IT - Engineers"
+  display_name     = "IT - Engineers"
   security_enabled = true
 }
 
 resource "azuread_group_member" "engineers" {
-  for_each = { for u in azuread_user.users: u.mail_nickname => u if u.department == "Engineering" }
+  for_each = { for u in azuread_user.users : u.mail_nickname => u if u.department == "Engineering" }
 
   group_object_id  = azuread_group.engineers.id
   member_object_id = each.value.id
