@@ -95,7 +95,7 @@ resource "aws_kms_key" "bucket_kms_key" {
 }
 
 resource "aws_s3_bucket" "stamp_bucket" {
-  bucket_prefix              = var.bucket_name
+  bucket_prefix       = var.bucket_name
   object_lock_enabled = var.object_lock_enabled
   tags                = var.tags
 }
